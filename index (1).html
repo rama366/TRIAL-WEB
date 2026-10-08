@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tasks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e9edf0; --card:#ffffff; --ink:#15202b; --muted:#6b7885; --line:#e3e8ec;
+  --accent:#0f766e; --accent-soft:#d7eeeb; --danger:#c2410c;
+  --shadow:0 1px 2px rgba(21,32,43,.06),0 12px 40px -12px rgba(21,32,43,.18);
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  --sans:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+:root[data-theme="dark"]{
+  --bg:#0e1419; --card:#161e26; --ink:#e8edf1; --muted:#8a99a6; --line:#243039;
+  --accent:#34c3b3; --accent-soft:#16352f; --danger:#f08a5d;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 16px 48px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  display:flex;justify-content:center;align-items:flex-start;
+  padding:clamp(16px,6vh,72px) 16px;transition:background .4s,color .4s;
+  -webkit-font-smoothing:antialiased;
+}
+.app{
+  width:100%;max-width:560px;background:var(--card);border-radius:20px;
+  box-shadow:var(--shadow);overflow:hidden;
+  animation:rise .7s cubic-bezier(.2,.8,.2,1) both;transition:background .4s;
+}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
+
+header{display:flex;align-items:center;gap:20px;padding:32px 32px 24px}
+.title{flex:1;min-width:0}
+.date{font-size:.85rem;color:var(--muted);margin-bottom:6px}
+h1{font-family:var(--serif);font-weight:500;font-size:2.4rem;letter-spacing:-.02em;line-height:1.05}
+.sub{font-family:var(--serif);font-style:italic;color:var(--muted);margin-top:6px;font-size:1.05rem}
+
+.ring{position:relative;width:76px;height:76px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:6}
+.ring .track{stroke:var(--line)}
+.ring .bar{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:201.06;stroke-dashoffset:201.06;transition:stroke-dashoffset .8s cubic-bezier(.3,.9,.3,1)}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:1.15rem}
+
+.theme{
+  position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;
+  display:grid;place-items:center;transition:transform .5s,color .2s,border-color .2s;
+}
+.theme:hover{color:var(--ink);transform:rotate(25deg)}
+.wrap{position:relative;width:100%;max-width:560px}
+
+form{display:flex;gap:10px;padding:0 32px 24px}
+input[type=text]{
+  flex:1;min-width:0;font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);
+  border:1.5px solid transparent;border-radius:12px;padding:14px 16px;outline:none;
+  transition:border-color .2s,background .4s,box-shadow .2s;
+}
+input[type=text]::placeholder{color:var(--muted)}
+input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.add{
+  font:inherit;font-weight:600;border:0;border-radius:12px;padding:0 22px;cursor:pointer;
+  background:var(--accent);color:#fff;transition:transform .15s,filter .2s;
+}
+:root[data-theme="dark"] .add{color:#06201c}
+.add:hover{filter:brightness(1.08)}
+.add:active{transform:scale(.95)}
+
+nav{display:flex;gap:4px;padding:0 32px;border-bottom:1px solid var(--line);position:relative}
+nav button{
+  font:inherit;font-size:.9rem;font-weight:500;color:var(--muted);background:none;border:0;
+  padding:10px 12px 12px;cursor:pointer;transition:color .2s;
+}
+nav button:hover{color:var(--ink)}
+nav button[aria-selected=true]{color:var(--ink)}
+.ind{position:absolute;bottom:-1px;height:2px;background:var(--accent);border-radius:2px;transition:left .35s cubic-bezier(.3,.9,.3,1),width .35s cubic-bezier(.3,.9,.3,1)}
+
+ul{list-style:none;padding:8px 20px;min-height:120px;max-height:52vh;overflow-y:auto}
+li{
+  display:flex;align-items:center;gap:14px;padding:14px 12px;border-radius:12px;
+  animation:enter .45s cubic-bezier(.2,.8,.2,1) both;
+  transition:background .2s,opacity .3s;
+}
+li:hover{background:var(--bg)}
+li.leaving{animation:leave .35s ease forwards}
+@keyframes enter{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+@keyframes leave{to{opacity:0;transform:translateX(40px);height:0;padding-top:0;padding-bottom:0}}
+
+.check{
+  appearance:none;-webkit-appearance:none;flex:none;width:24px;height:24px;border-radius:50%;
+  border:2px solid var(--muted);cursor:pointer;display:grid;place-items:center;
+  transition:background .25s,border-color .25s,transform .25s cubic-bezier(.3,1.6,.5,1);
+}
+.check:hover{border-color:var(--accent)}
+.check::after{
+  content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;
+  transform:rotate(45deg) scale(0);margin-top:-2px;transition:transform .25s cubic-bezier(.3,1.6,.5,1);
+}
+:root[data-theme="dark"] .check::after{border-color:#06201c}
+.check:checked{background:var(--accent);border-color:var(--accent);transform:scale(1.1)}
+.check:checked::after{transform:rotate(45deg) scale(1)}
+.check:focus-visible,.x:focus-visible,nav button:focus-visible,.add:focus-visible,.theme:focus-visible,.clear:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.text{flex:1;min-width:0;font-size:1rem;line-height:1.4;word-break:break-word;position:relative;cursor:text}
+.text span{background:linear-gradient(currentColor,currentColor) 0 55%/0 1.5px no-repeat;transition:background-size .4s ease,color .3s}
+li.done .text span{background-size:100% 1.5px;color:var(--muted)}
+.edit{flex:1;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--accent);border-radius:8px;padding:6px 10px;outline:none}
+
+.x{
+  flex:none;width:30px;height:30px;border-radius:8px;border:0;background:none;color:var(--muted);
+  cursor:pointer;opacity:0;transition:opacity .2s,color .2s,background .2s;display:grid;place-items:center;
+}
+li:hover .x,.x:focus-visible{opacity:1}
+.x:hover{color:var(--danger);background:var(--bg)}
+@media (hover:none){.x{opacity:.7}}
+
+.empty{text-align:center;padding:36px 16px;color:var(--muted);animation:enter .5s both}
+.empty b{display:block;font-family:var(--serif);font-weight:500;font-size:1.3rem;color:var(--ink);margin-bottom:4px}
+
+footer{display:flex;justify-content:space-between;align-items:center;padding:16px 32px 24px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line)}
+.clear{font:inherit;font-size:.85rem;color:var(--muted);background:none;border:0;cursor:pointer;padding:4px 6px;border-radius:6px;transition:color .2s}
+.clear:hover{color:var(--danger)}
+.clear[disabled]{opacity:.4;pointer-events:none}
+
+@media (max-width:480px){
+  header{padding:28px 20px 20px}form{padding:0 20px 20px}nav{padding:0 12px}footer{padding:16px 20px 22px}
+  h1{font-size:2rem}.ring{width:64px;height:64px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <button class="theme" id="theme" aria-label="Switch between light and dark theme">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+  <main class="app">
+    <header>
+      <div class="title">
+        <div class="date" id="date"></div>
+        <h1>Today's tasks</h1>
+        <p class="sub" id="sub"></p>
+      </div>
+      <div class="ring" aria-hidden="true">
+        <svg width="76" height="76" viewBox="0 0 76 76"><circle class="track" cx="38" cy="38" r="32"/><circle class="bar" id="bar" cx="38" cy="38" r="32"/></svg>
+        <span id="pct">0%</span>
+      </div>
+    </header>
+
+    <form id="form" autocomplete="off">
+      <input type="text" id="input" placeholder="What needs doing?" maxlength="120" aria-label="New task">
+      <button class="add" type="submit">Add task</button>
+    </form>
+
+    <nav role="tablist" id="tabs">
+      <button role="tab" data-f="all" aria-selected="true">All</button>
+      <button role="tab" data-f="active" aria-selected="false">Active</button>
+      <button role="tab" data-f="done" aria-selected="false">Completed</button>
+      <span class="ind" id="ind"></span>
+    </nav>
+
+    <ul id="list" aria-live="polite"></ul>
+
+    <footer>
+      <span id="count"></span>
+      <button class="clear" id="clear">Clear completed</button>
+    </footer>
+  </main>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const list = $('#list'), input = $('#input'), form = $('#form');
+  let tasks = [], filter = 'all';
+
+  // Storage (guarded: some browsers block it)
+  const load = () => { try { return JSON.parse(localStorage.getItem('tasks.v1')) || []; } catch { return []; } };
+  const save = () => { try { localStorage.setItem('tasks.v1', JSON.stringify(tasks)); } catch {} };
+  tasks = load();
+  if (!tasks.length && !localStorage.getItem('tasks.seen')) {
+    tasks = [
+      { id: 1, text: 'Plan the week ahead', done: true },
+      { id: 2, text: 'Reply to pending messages', done: false },
+      { id: 3, text: 'Double-click a task to edit it', done: false }
+    ];
+    try { localStorage.setItem('tasks.seen', '1'); } catch {}
+  }
+
+  // Theme
+  const root = document.documentElement;
+  let theme = null; try { theme = localStorage.getItem('theme'); } catch {}
+  if (!theme) theme = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  root.dataset.theme = theme;
+  $('#theme').onclick = () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = theme;
+    try { localStorage.setItem('theme', theme); } catch {}
+  };
+
+  // Date
+  $('#date').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const esc = s => s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  function render(animate = true) {
+    const shown = tasks.filter(t => filter === 'all' || (filter === 'done' ? t.done : !t.done));
+    list.innerHTML = shown.length ? shown.map(t => `
+      <li data-id="${t.id}" class="${t.done ? 'done' : ''}" ${animate ? '' : 'style="animation:none"'}>
+        <input type="checkbox" class="check" aria-label="Mark complete" ${t.done ? 'checked' : ''}>
+        <div class="text"><span>${esc(t.text)}</span></div>
+        <button class="x" aria-label="Delete task"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </li>`).join('') : `
+      <div class="empty"><b>${filter === 'done' ? 'Nothing completed yet' : filter === 'active' ? 'All caught up' : 'No tasks yet'}</b>${filter === 'all' ? 'Type a task above and press Enter.' : filter === 'done' ? 'Finished tasks will show up here.' : 'Every task is done.'}</div>`;
+    stats();
+  }
+
+  function stats() {
+    const total = tasks.length, done = tasks.filter(t => t.done).length, left = total - done;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    $('#bar').style.strokeDashoffset = 201.06 * (1 - pct / 100);
+    $('#pct').textContent = pct + '%';
+    $('#count').textContent = left === 1 ? '1 task left' : left + ' tasks left';
+    $('#sub').textContent = !total ? 'A clear page.' : left === 0 ? 'Everything is done.' : done + ' of ' + total + ' complete';
+    $('#clear').disabled = !done;
+  }
+
+  function add(text) {
+    text = text.trim(); if (!text) return;
+    tasks.unshift({ id: Date.now(), text, done: false });
+    if (filter === 'done') setFilter('all'); else render();
+    save();
+  }
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!input.value.trim()) { input.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}], { duration: 250 }); return; }
+    add(input.value); input.value = ''; input.focus();
+  });
+
+  list.addEventListener('click', e => {
+    const li = e.target.closest('li'); if (!li) return;
+    const t = tasks.find(t => t.id == li.dataset.id);
+    if (e.target.classList.contains('check')) {
+      t.done = e.target.checked; li.classList.toggle('done', t.done); save(); stats();
+      if (filter !== 'all') setTimeout(() => remove(li, false), 450);
+    } else if (e.target.closest('.x')) remove(li, true);
+  });
+
+  function remove(li, del) {
+    li.classList.add('leaving');
+    setTimeout(() => {
+      if (del) { tasks = tasks.filter(t => t.id != li.dataset.id); save(); }
+      render(false);
+    }, 330);
+  }
+
+  // Edit on double-click
+  list.addEventListener('dblclick', e => {
+    const box = e.target.closest('.text'); if (!box) return;
+    const li = box.closest('li'), t = tasks.find(t => t.id == li.dataset.id);
+    const field = Object.assign(document.createElement('input'), { className: 'edit', value: t.text, maxLength: 120 });
+    box.replaceWith(field); field.focus(); field.select();
+    const finish = ok => {
+      if (ok && field.value.trim()) { t.text = field.value.trim(); save(); }
+      render(false);
+    };
+    field.addEventListener('keydown', k => { if (k.key === 'Enter') finish(true); if (k.key === 'Escape') finish(false); });
+    field.addEventListener('blur', () => finish(true), { once: true });
+  });
+
+  $('#clear').onclick = () => {
+    const doneLis = [...list.querySelectorAll('li.done')];
+    doneLis.forEach(li => li.classList.add('leaving'));
+    setTimeout(() => { tasks = tasks.filter(t => !t.done); save(); render(false); }, doneLis.length ? 330 : 0);
+  };
+
+  // Filter tabs with sliding indicator
+  const tabs = [...document.querySelectorAll('#tabs button')], ind = $('#ind');
+  function moveInd() {
+    const b = tabs.find(b => b.getAttribute('aria-selected') === 'true');
+    ind.style.left = b.offsetLeft + 'px'; ind.style.width = b.offsetWidth + 'px';
+  }
+  function setFilter(f) {
+    filter = f; tabs.forEach(b => b.setAttribute('aria-selected', b.dataset.f === f)); moveInd(); render();
+  }
+  tabs.forEach(b => b.onclick = () => setFilter(b.dataset.f));
+  addEventListener('resize', moveInd);
+
+  render(); 
+  document.fonts && document.fonts.ready.then(moveInd);
+  moveInd();
+})();
+</script>
+</body>
+</html>
